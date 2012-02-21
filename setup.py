@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2010 Zope Foundation and Contributors.
+# Copyright (c) 2010, 2012 Zope Foundation and Contributors.
 #
 # This software is subject to the provisions of the Zope Public License,
 # Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
@@ -20,7 +20,7 @@ README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 setup(name='appendonly',
-      version='0.9.1dev',
+      version='0.10dev',
       description='Persistent append-only data structures.',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[

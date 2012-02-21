@@ -21,15 +21,8 @@ class _LayerFull(ValueError):
     pass
 
 
-class _Layer(object):
-    """ Append-only list with maximum length.
-
-    - Raise `_LayerFull` on attempts to exceed that length.
-
-    - Iteration occurs in reverse order of appends, and yields (index, object)
-      tuples.
-
-    - Hold generation (a sequence number) on behalf of `AppendStack`.
+class _LayerBase(object):
+    """ Base for both _Layer and _ArchiveLayer.
     """
     def __init__(self, max_length=100, generation=0):
         self._stack = []
@@ -52,6 +45,18 @@ class _Layer(object):
             if index <= latest_index:
                 break
             yield index, obj
+
+
+class _Layer(_LayerBase):
+    """ Append-only list with maximum length.
+
+    - Raise `_LayerFull` on attempts to exceed that length.
+
+    - Iteration occurs in reverse order of appends, and yields (index, object)
+      tuples.
+
+    - Hold generation (a sequence number) on behalf of `AppendStack`.
+    """
 
     def push(self, obj):
         if len(self._stack) >= self._max_length:
@@ -179,3 +184,59 @@ class AppendStack(Persistent):
             m_layers[0][1].append(to_push)
 
         return c_m_layers, c_m_length, m_layers[:c_m_layers]
+
+
+class _ArchiveLayer(Persistent, _LayerBase):
+    """ Allow saving layer info in separate persistent sub-objects.
+
+    Archive layers don't support 'push' (they are conceptually immuatble).
+
+    These layers will be kept in a linked list in an archive.
+    """
+    _next = None
+
+    @classmethod
+    def fromLayer(klass, layer):
+        copy = klass(layer._max_length, layer._generation)
+        copy._stack[:] = layer._stack
+        return copy
+
+
+class Archive(Persistent):
+    """ Manage layers discarded from an AppendStack as a persistent linked list.
+    """
+    _head = None
+    _generation = -1
+
+    def __iter__(self):
+        current = self._head
+        while current is not None:
+            for index, item in current:
+                yield current._generation, index, item
+            current = current._next
+
+    def addLayer(self, generation, items):
+        if generation <= self._generation:
+            raise ValueError(
+                    "Cannot add older layers to an already-populated archive")
+        copy = _ArchiveLayer(generation=generation)
+        copy._stack[:] = items
+        self._head, copy._next = copy, self._head
+        self._generation = generation
+
+    #
+    # ZODB Conflict resolution
+    #
+    # Archive is a simpler problem, because the only mutation occurs when
+    # adding a layer.  We can resolve IFF the committed version and the new
+    # version have the same generation:  in that case, we can just keep the
+    # committed version, because the two layers are equivalent.
+    #
+    # This neglects the case of independently-constructed layers:  we presume
+    # that the source layers are coming from the same AppendStack, in which
+    # case they will be identical.
+    #
+    def _p_resolveConflict(self, old, committed, new):
+        if committed['_generation'] == new['_generation']:
+            return committed
+        raise ConflictError('Conflicting generations')

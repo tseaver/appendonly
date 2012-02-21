@@ -12,11 +12,8 @@
 ##############################################################################
 import unittest
 
-class LayerTests(unittest.TestCase):
 
-    def _getTargetClass(self):
-        from appendonly import _Layer
-        return _Layer
+class _LayerTestBase(object):
 
     def _makeOne(self, *args, **kw):
         return self._getTargetClass()(*args, **kw)
@@ -48,6 +45,23 @@ class LayerTests(unittest.TestCase):
     def test_newer_empty(self):
         layer = self._makeOne()
         self.assertEqual(list(layer.newer(0)), [])
+
+
+class LayerTests(unittest.TestCase, _LayerTestBase):
+
+    def _getTargetClass(self):
+        from appendonly import _Layer
+        return _Layer
+
+    def test___iter___filled(self):
+        layer = self._makeOne()
+        OBJ1 = object()
+        OBJ2 = object()
+        OBJ3 = object()
+        layer.push(OBJ1)
+        layer.push(OBJ2)
+        layer.push(OBJ3)
+        self.assertEqual(list(layer), [(2, OBJ3), (1, OBJ2), (0, OBJ1)])
 
     def test_newer_miss(self):
         layer = self._makeOne()
@@ -91,6 +105,7 @@ class LayerTests(unittest.TestCase):
         self.assertEqual(list(layer), [(1, OBJ2),
                                        (0, OBJ1),
                                       ])
+
 
 class AppendStackTests(unittest.TestCase):
 
@@ -429,3 +444,131 @@ class AppendStackTests(unittest.TestCase):
         stack = self._makeOne()
         merged = stack._p_resolveConflict(O_STATE, C_STATE, N_STATE)
         self.assertEqual(merged, M_STATE)
+
+
+class ArchiveLayerTests(unittest.TestCase, _LayerTestBase):
+
+    def _getTargetClass(self):
+        from appendonly import _ArchiveLayer
+        return _ArchiveLayer
+
+    def test_is_persistent(self):
+        from persistent import Persistent
+        self.failUnless(issubclass(self._getTargetClass(), Persistent))
+
+    def test_fromLayer(self):
+        from appendonly import _Layer
+        klass = self._getTargetClass()
+        source = _Layer(max_length=42, generation=13)
+        for i in range(25):
+            obj = object()
+            source.push(obj)
+        copied = klass.fromLayer(source)
+        self.assertEqual(copied._max_length, 42)
+        self.assertEqual(copied._generation, 13)
+        self.assertEqual(len(copied._stack), len(source._stack))
+        for s_obj, c_obj in zip(source._stack, copied._stack):
+            self.failUnless(s_obj is c_obj)
+
+    def test___iter___filled(self):
+        from appendonly import _Layer
+        klass = self._getTargetClass()
+        source = _Layer()
+        OBJ1 = object()
+        OBJ2 = object()
+        OBJ3 = object()
+        source.push(OBJ1)
+        source.push(OBJ2)
+        source.push(OBJ3)
+        copied = klass.fromLayer(source)
+        self.assertEqual(list(copied), [(2, OBJ3), (1, OBJ2), (0, OBJ1)])
+
+    def test_newer_miss(self):
+        from appendonly import _Layer
+        klass = self._getTargetClass()
+        source = _Layer()
+        source.push(object())
+        copied = klass.fromLayer(source)
+        self.assertEqual(list(copied.newer(0)), [])
+
+    def test_newer_hit(self):
+        from appendonly import _Layer
+        klass = self._getTargetClass()
+        source = _Layer()
+        OBJ1 = object()
+        OBJ2 = object()
+        OBJ3 = object()
+        source.push(OBJ1)
+        source.push(OBJ2)
+        source.push(OBJ3)
+        copied = klass.fromLayer(source)
+        self.assertEqual(list(copied.newer(0)),
+                         [(2, OBJ3), (1, OBJ2)])
+
+
+class ArchiveTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from appendonly import Archive
+        return Archive
+
+    def _makeOne(self):
+        return self._getTargetClass()()
+
+    def test_ctor(self):
+        archive = self._makeOne()
+        self.failUnless(archive._head is None)
+        self.assertEqual(archive._generation, -1)
+
+    def test___iter___empty(self):
+        archive = self._makeOne()
+        self.assertEqual(list(archive), [])
+
+    def test___iter___filled(self):
+        archive = self._makeOne()
+        created = []
+        layer0 = []
+        for i in range(3):
+            obj = object()
+            created.append(obj)
+            layer0.append(obj)
+        archive.addLayer(0, layer0)
+        layer1 = []
+        for i in range(2):
+            obj = object()
+            created.append(obj)
+            layer1.append(obj)
+        archive.addLayer(1, layer1)
+        found = []
+        gen_ndx = []
+        for generation, index, obj in archive:
+            gen_ndx.append((generation, index))
+            found.append(obj)
+        self.assertEqual(gen_ndx, [(1, 1), (1, 0), (0, 2), (0, 1), (0, 0)])
+        self.assertEqual(found, list(reversed(created)))
+
+    def test_addLayer_older(self):
+        archive = self._makeOne()
+        archive.addLayer(0, [])
+        self.assertRaises(ValueError, archive.addLayer, 0, [])
+
+    def test__p_resolveConflict_w_same_generation(self):
+        O_STATE = {'_generation': -1, '_head': None}
+        c_obj = object()
+        C_STATE = {'_generation': 0, '_head': c_obj}
+        n_obj = object()
+        N_STATE = {'_generation': 0, '_head': n_obj}
+        archive = self._makeOne()
+        resolved = archive._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, C_STATE)
+
+    def test__p_resolveConflict_w_different_generation(self):
+        from ZODB.POSException import ConflictError
+        O_STATE = {'_generation': -1, '_head': None}
+        c_obj = object()
+        C_STATE = {'_generation': 0, '_head': c_obj}
+        n_obj = object()
+        N_STATE = {'_generation': 1, '_head': n_obj}
+        archive = self._makeOne()
+        self.assertRaises(ConflictError, archive._p_resolveConflict,
+                          O_STATE, C_STATE, N_STATE)

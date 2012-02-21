@@ -31,3 +31,28 @@ This class provides a LIFO stack of separately-persisted objects:
 
 The stack is implemented as a single persistent record, with custom
 ZODB conflict resolution code.
+
+
+``appendonly.Archive``
+----------------------
+
+This class provides a linked list of separately-persisted copies of layer
+data pruned from an ``AppendStack``.  The intended use would be something
+like:
+
+  from appendonly import AppendStack
+  from appendonly import Archive
+
+  class RecentItems(object):
+      def __init__(self):
+          self._recent = AppendStack()
+          self._archive = Archive()
+
+      def pushItem(object):
+          self._stack.push(object, self._archive.addLayer)
+
+      def __iter__(self):
+          for generation, index, item in self._stack:
+              yield item
+          for generation, index, item in self._archive:
+              yield items
