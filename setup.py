@@ -20,7 +20,7 @@ README = open(os.path.join(here, 'README.txt')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 setup(name='appendonly',
-      version='0.10',
+      version='0.11dev',
       description='Persistent append-only data structures.',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
@@ -31,6 +31,7 @@ setup(name='appendonly',
         "Programming Language :: Python :: 2.4",
         "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
       ],
       author='Tres Seaver, Agendaless Consulting, Inc.',
       author_email='tseaver@agendaless.com',
