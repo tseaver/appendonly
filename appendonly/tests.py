@@ -572,3 +572,140 @@ class ArchiveTests(unittest.TestCase):
         archive = self._makeOne()
         self.assertRaises(ConflictError, archive._p_resolveConflict,
                           O_STATE, C_STATE, N_STATE)
+
+
+class AccumulatorTests(unittest.TestCase):
+
+    def _getTargetClass(self):
+        from appendonly import Accumulator
+        return Accumulator
+
+    def _makeOne(self, value=None):
+        if value is None:
+            return self._getTargetClass()()
+        return self._getTargetClass()(value)
+
+    def test_ctor_wo_value(self):
+        aclist = self._makeOne()
+        self.assertEqual(aclist._list, [])
+
+    def test_ctor_w_value(self):
+        VALUE = [0, 1, 2]
+        aclist = self._makeOne(VALUE)
+        self.assertEqual(aclist._list, VALUE)
+        self.assertFalse(aclist._list is VALUE)
+
+    def test___iter___empty(self):
+        aclist = self._makeOne()
+        self.assertEqual(list(aclist), [])
+
+    def test___iter___filled(self):
+        VALUE = [0, 1, 2]
+        aclist = self._makeOne(VALUE)
+        self.assertEqual(list(aclist), VALUE)
+
+    def test_append(self):
+        VALUE = [0, 1, 2]
+        aclist = self._makeOne()
+        for value in VALUE:
+            aclist.append(value)
+        self.assertEqual(list(aclist), VALUE)
+
+    def test_consume(self):
+        VALUE = [0, 1, 2]
+        aclist = self._makeOne(VALUE)
+        result = aclist.consume()
+        self.assertEqual(result, VALUE)
+        self.assertEqual(list(aclist), [])
+
+    def test___getstate___empty(self):
+        aclist = self._makeOne()
+        self.assertEqual(aclist.__getstate__(), [])
+
+    def test___getstate___filled(self):
+        VALUE = [0, 1, 2]
+        aclist = self._makeOne(VALUE)
+        self.assertEqual(aclist.__getstate__(), VALUE)
+
+    def test___setstate___empty(self):
+        aclist = self._makeOne([0, 1, 2])
+        aclist.__setstate__([])
+        self.assertEqual(list(aclist), [])
+
+    def test___setstate___filled(self):
+        VALUE = [0, 1, 2]
+        aclist = self._makeOne()
+        aclist.__setstate__(VALUE)
+        self.assertEqual(list(aclist), VALUE)
+
+    def test__p_resolveConflict_w_both_append(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [1, 2, 3, 4]
+        N_STATE = [1, 2, 3, 5]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [1, 2, 3, 4, 5])
+
+    def test__p_resolveConflict_w_c_consume_n_append(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = []
+        N_STATE = [1, 2, 3, 4]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4])
+
+    def test__p_resolveConflict_w_n_consume_c_append(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [1, 2, 3, 4]
+        N_STATE = []
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4])
+
+    def test__p_resolveConflict_w_both_consume(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = []
+        N_STATE = []
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [])
+
+    def test__p_resolveConflict_w_c_append_n_consume_append(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [1, 2, 3, 4]
+        N_STATE = [5]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4, 5])
+
+    def test__p_resolveConflict_w_n_append_c_consume_append(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [1, 2, 3, 4]
+        N_STATE = [5]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4, 5])
+
+    def test__p_resolveConflict_w_c_consume_n_consume_append(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = []
+        N_STATE = [4]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4])
+
+    def test__p_resolveConflict_w_n_consume_c_consume_append(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [4]
+        N_STATE = []
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4])
+
+    def test__p_resolveConflict_w_both_consume_append(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [4, 5]
+        N_STATE = [6]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4, 5, 6])

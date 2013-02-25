@@ -240,3 +240,52 @@ class Archive(Persistent):
         if committed['_generation'] == new['_generation']:
             return committed
         raise ConflictError('Conflicting generations')
+
+
+class Accumulator(Persistent):
+
+    __slots__ = ('_list',)
+
+    def __init__(self, value=()):
+        self._list = list(value)
+
+    def __iter__(self):
+        return iter(self._list)
+
+    def append(self, v):
+        self._list.append(v)
+
+    def consume(self):
+        result, self._list = self._list[:], []
+        return result
+
+    def __getstate__(self):
+        return self._list
+
+    def __setstate__(self, value):
+        self._list = list(value)
+
+    #
+    # ZODB Conflict resolution
+    #
+    # The only allowable mutations append or clear the list (or clear
+    # followed by one or more appends).  If either the committed or the
+    # new state has cleared, contcatenate the suffices from both.  Otherwise,
+    # contcatenate the new suffix to committed.
+    #
+    def _p_resolveConflict(self, old, committed, new):
+        if committed[:len(old)] == old:
+            c_clear = False
+            c_sfx = committed[len(old):]
+        else:
+            c_clear = True
+            c_sfx = committed[:]
+        if new[:len(old)] == old:
+            n_clear = False
+            n_sfx = new[len(old):]
+        else:
+            n_clear = True
+            n_sfx = new[:]
+        if c_clear or n_clear:
+            return c_sfx + n_sfx
+        return committed + n_sfx

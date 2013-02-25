@@ -4,6 +4,9 @@
 0.11 (unreleased)
 -----------------
 
+- Added a conflict-free 'Accumulator' class: manages a queue of items which
+  can be iterated, appended to, or conumed entirely (no partial / pop).
+
 - Automated tests for supported Python versions via 'tox'.
 
 - Dropped support for Python 2.4 / 2.5.
