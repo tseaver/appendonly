@@ -254,6 +254,7 @@ class Accumulator(Persistent):
 
     def append(self, v):
         self._list.append(v)
+        self._p_changed = 1
 
     def consume(self):
         result, self._list = self._list[:], []

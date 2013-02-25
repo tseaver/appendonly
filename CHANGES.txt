@@ -1,6 +1,12 @@
 ``appendonly`` Changelog
 ========================
 
+1.0.1 (2013-02-25)
+------------------
+
+- Fix brown-bag in 1.0 release ('Accumulator.append' changes were not
+  persisted).
+
 1.0 (2013-02-25)
 ----------------
 
