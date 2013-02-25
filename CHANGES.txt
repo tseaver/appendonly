@@ -1,7 +1,7 @@
 ``appendonly`` Changelog
 ========================
 
-1.0 (unreleased)
+1.0 (2013-02-25)
 ----------------
 
 - Added a conflict-free 'Accumulator' class: manages a queue of items which
