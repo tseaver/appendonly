@@ -4,7 +4,9 @@
 0.11 (unreleased)
 -----------------
 
-- TBD
+- Automated tests for supported Python versions via 'tox'.
+
+- Dropped support for Python 2.4 / 2.5.
 
 
 0.10 (2012-02-21)
