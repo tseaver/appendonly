@@ -12,8 +12,13 @@
 ##############################################################################
 
 from persistent import Persistent
-from ZODB.POSException import ConflictError
-from zope.interface import implements
+from zope.interface import implementer
+
+try:
+    from ZODB.POSException import ConflictError
+except ImportError:
+    class ConflictError(Exception):
+        pass
 
 from appendonly.interfaces import IAppendStack
 
@@ -64,6 +69,7 @@ class _Layer(_LayerBase):
         self._stack.append(obj)
 
 
+@implementer(IAppendStack)
 class AppendStack(Persistent):
     """ Append-only stack w/ garbage collection.
 
@@ -76,12 +82,11 @@ class AppendStack(Persistent):
     - Iteration occurs in reverse order of appends, and yields
       (generation, index, object) tuples.
     """
-    implements(IAppendStack)
 
     def __init__(self, max_layers=10, max_length=100):
         self._max_layers = max_layers
         self._max_length = max_length
-        self._layers = [_Layer(max_length, generation=0L)]
+        self._layers = [_Layer(max_length, generation=0)]
 
     def __iter__(self):
         """ See IAppendStack.
@@ -107,7 +112,7 @@ class AppendStack(Persistent):
             layers[0].push(obj)
         except _LayerFull:
             new_layer = _Layer(self._max_length,
-                              generation=layers[0]._generation+1L)
+                              generation=layers[0]._generation+1)
             new_layer.push(obj)
             self._layers.insert(0, new_layer)
         self._layers, pruned = layers[:max], layers[max:]
@@ -180,7 +185,7 @@ class AppendStack(Persistent):
         while new_objects:
             to_push, new_objects = new_objects[0], new_objects[1:]
             if len(m_layers[0][1]) == c_m_length:
-                m_layers.insert(0, (m_layers[0][0]+1L, []))
+                m_layers.insert(0, (m_layers[0][0]+1, []))
             m_layers[0][1].append(to_push)
 
         return c_m_layers, c_m_length, m_layers[:c_m_layers]

@@ -1,10 +1,15 @@
 ``appendonly`` Changelog
 ========================
 
+After 1.0.1
+-----------
+
+- Added support for Python 3.2 / 3.3.
+
 1.0.1 (2013-02-25)
 ------------------
 
-- Fix brown-bag in 1.0 release ('Accumulator.append' changes were not
+- Fixed brown-bag in 1.0 release ('Accumulator.append' changes were not
   persisted).
 
 1.0 (2013-02-25)
