@@ -4,6 +4,8 @@
 After 1.0.1
 -----------
 
+- Added ``Accumulator.extend`` method to enhance list-ness.
+
 - Added support for PyPy.
 
 - Added support for Python 3.2 / 3.3.

@@ -261,6 +261,10 @@ class Accumulator(Persistent):
         self._list.append(v)
         self._p_changed = 1
 
+    def extend(self, v):
+        self._list.extend(v)
+        self._p_changed = 1
+
     def consume(self):
         result, self._list = self._list[:], []
         return result
@@ -274,10 +278,11 @@ class Accumulator(Persistent):
     #
     # ZODB Conflict resolution
     #
-    # The only allowable mutations append or clear the list (or clear
-    # followed by one or more appends).  If either the committed or the
-    # new state has cleared, contcatenate the suffices from both.  Otherwise,
-    # contcatenate the new suffix to committed.
+    # The only allowable mutations append / exten or clear the list (or
+    # clear it # followed by one or more appends / extends).
+    # If either the committed or the new state has cleared, contcatenate
+    # the suffices from both.  Otherwise, contcatenate the new suffix to
+    # committed.
     #
     def _p_resolveConflict(self, old, committed, new):
         if committed[:len(old)] == old:
