@@ -16,7 +16,7 @@ from zope.interface import implementer
 
 try:
     from ZODB.POSException import ConflictError
-except ImportError:
+except ImportError: #pragma NO COVER
     class ConflictError(Exception):
         pass
 
