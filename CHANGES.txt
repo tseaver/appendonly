@@ -1,6 +1,15 @@
 ``appendonly`` Changelog
 ========================
 
+1.0.2 (2013-11-29)
+------------------
+
+- N.B.:  this release is made only FBO an customer running with old
+  versions of the dependencies;  it should **not** be published to PyPI.
+
+- Added ``Accumulator.extend`` method to improve list-ness (backport from
+  1.1, for compatibility with older ``zope.interface`` versions.
+
 1.0.1 (2013-02-25)
 ------------------
 
