@@ -38,7 +38,7 @@ ZODB conflict resolution code.
 
 This class provides a linked list of separately-persisted copies of layer
 data pruned from an ``AppendStack``.  The intended use would be something
-like:
+like::
 
   from appendonly import AppendStack
   from appendonly import Archive
@@ -56,3 +56,12 @@ like:
               yield item
           for generation, index, item in self._archive:
               yield items
+
+
+``appendonly.Accumulator``
+--------------------------
+
+This class provides a list-like data structure, where the only mutations
+allowed are to append to or clear the list.  Intended uses are for a
+set of pending operations / changes / notifications, which get processed
+as a unit (at which point the accumulator is cleared).

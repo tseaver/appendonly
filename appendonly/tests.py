@@ -611,6 +611,12 @@ class AccumulatorTests(unittest.TestCase):
             aclist.append(value)
         self.assertEqual(list(aclist), VALUE)
 
+    def test_extend(self):
+        VALUE = [0, 1, 2]
+        aclist = self._makeOne()
+        aclist.extend(VALUE)
+        self.assertEqual(list(aclist), VALUE)
+
     def test_consume(self):
         VALUE = [0, 1, 2]
         aclist = self._makeOne(VALUE)
@@ -646,6 +652,14 @@ class AccumulatorTests(unittest.TestCase):
         resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
         self.assertEqual(resolved, [1, 2, 3, 4, 5])
 
+    def test__p_resolveConflict_w_both_extend(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [1, 2, 3, 4, 6]
+        N_STATE = [1, 2, 3, 5, 7]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [1, 2, 3, 4, 6, 5, 7])
+
     def test__p_resolveConflict_w_c_consume_n_append(self):
         O_STATE = [1, 2, 3]
         C_STATE = []
@@ -654,6 +668,14 @@ class AccumulatorTests(unittest.TestCase):
         resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
         self.assertEqual(resolved, [4])
 
+    def test__p_resolveConflict_w_c_consume_n_extend(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = []
+        N_STATE = [1, 2, 3, 4, 5]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4, 5])
+
     def test__p_resolveConflict_w_n_consume_c_append(self):
         O_STATE = [1, 2, 3]
         C_STATE = [1, 2, 3, 4]
@@ -661,6 +683,14 @@ class AccumulatorTests(unittest.TestCase):
         aclist = self._makeOne()
         resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
         self.assertEqual(resolved, [4])
+
+    def test__p_resolveConflict_w_n_consume_c_extend(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [1, 2, 3, 4, 5]
+        N_STATE = []
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4, 5])
 
     def test__p_resolveConflict_w_both_consume(self):
         O_STATE = [1, 2, 3]
@@ -678,6 +708,14 @@ class AccumulatorTests(unittest.TestCase):
         resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
         self.assertEqual(resolved, [4, 5])
 
+    def test__p_resolveConflict_w_c_extend_n_consume_extend(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [1, 2, 3, 4, 6]
+        N_STATE = [5, 7]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4, 6, 5, 7])
+
     def test__p_resolveConflict_w_n_append_c_consume_append(self):
         O_STATE = [1, 2, 3]
         C_STATE = [1, 2, 3, 4]
@@ -685,6 +723,14 @@ class AccumulatorTests(unittest.TestCase):
         aclist = self._makeOne()
         resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
         self.assertEqual(resolved, [4, 5])
+
+    def test__p_resolveConflict_w_n_extend_c_consume_extend(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [1, 2, 3, 4, 6]
+        N_STATE = [5, 7]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4, 6, 5, 7])
 
     def test__p_resolveConflict_w_c_consume_n_consume_append(self):
         O_STATE = [1, 2, 3]
@@ -694,6 +740,14 @@ class AccumulatorTests(unittest.TestCase):
         resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
         self.assertEqual(resolved, [4])
 
+    def test__p_resolveConflict_w_c_consume_n_consume_extend(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = []
+        N_STATE = [4, 5]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4, 5])
+
     def test__p_resolveConflict_w_n_consume_c_consume_append(self):
         O_STATE = [1, 2, 3]
         C_STATE = [4]
@@ -702,6 +756,14 @@ class AccumulatorTests(unittest.TestCase):
         resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
         self.assertEqual(resolved, [4])
 
+    def test__p_resolveConflict_w_n_consume_c_consume_extend(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [4, 5]
+        N_STATE = []
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4, 5])
+
     def test__p_resolveConflict_w_both_consume_append(self):
         O_STATE = [1, 2, 3]
         C_STATE = [4, 5]
@@ -709,3 +771,11 @@ class AccumulatorTests(unittest.TestCase):
         aclist = self._makeOne()
         resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
         self.assertEqual(resolved, [4, 5, 6])
+
+    def test__p_resolveConflict_w_both_consume_extend(self):
+        O_STATE = [1, 2, 3]
+        C_STATE = [4, 5]
+        N_STATE = [6, 7]
+        aclist = self._makeOne()
+        resolved = aclist._p_resolveConflict(O_STATE, C_STATE, N_STATE)
+        self.assertEqual(resolved, [4, 5, 6, 7])
