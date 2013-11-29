@@ -1,8 +1,8 @@
 ``appendonly`` Changelog
 ========================
 
-After 1.0.1
------------
+1.1 (2013-11-28)
+----------------
 
 - Added ``Accumulator.extend`` method to enhance list-ness.
 
