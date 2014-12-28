@@ -1,6 +1,11 @@
 ``appendonly`` Changelog
 ========================
 
+1.2 (unreleased)
+----------------
+
+- Add support for testing on Travis.
+
 1.1 (2013-11-28)
 ----------------
 
@@ -13,7 +18,7 @@
 1.0.1 (2013-02-25)
 ------------------
 
-- Fixed brown-bag in 1.0 release ('Accumulator.append' changes were not
+- Fixed brown-bag in 1.0 release (``Accumulator.append`` changes were not
   persisted).
 
 1.0 (2013-02-25)
