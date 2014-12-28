@@ -20,7 +20,7 @@ README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
 setup(name='appendonly',
-      version='1.2.dev0',
+      version='1.2',
       description='Persistent append-only data structures.',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[

@@ -1,7 +1,7 @@
 ``appendonly`` Changelog
 ========================
 
-1.2 (unreleased)
+1.2 (2014-12-28)
 ----------------
 
 - Add support for Python 3.4.
