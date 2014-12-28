@@ -21,13 +21,13 @@ class _LayerTestBase(object):
     def test_ctor_defaults(self):
         layer = self._makeOne()
         self.assertEqual(layer._max_length, 100)
-        self.failUnless(type(layer._stack) is list)
+        self.assertTrue(type(layer._stack) is list)
         self.assertEqual(layer._generation, 0)
 
     def test_ctor_w_positional(self):
         layer = self._makeOne(4, 14)
         self.assertEqual(layer._max_length, 4)
-        self.failUnless(type(layer._stack) is list)
+        self.assertTrue(type(layer._stack) is list)
         self.assertEqual(layer._generation, 14)
 
     def test_ctor_w_max_length(self):
@@ -454,7 +454,7 @@ class ArchiveLayerTests(unittest.TestCase, _LayerTestBase):
 
     def test_is_persistent(self):
         from persistent import Persistent
-        self.failUnless(issubclass(self._getTargetClass(), Persistent))
+        self.assertTrue(issubclass(self._getTargetClass(), Persistent))
 
     def test_fromLayer(self):
         from appendonly import _Layer
@@ -468,7 +468,7 @@ class ArchiveLayerTests(unittest.TestCase, _LayerTestBase):
         self.assertEqual(copied._generation, 13)
         self.assertEqual(len(copied._stack), len(source._stack))
         for s_obj, c_obj in zip(source._stack, copied._stack):
-            self.failUnless(s_obj is c_obj)
+            self.assertTrue(s_obj is c_obj)
 
     def test___iter___filled(self):
         from appendonly import _Layer
@@ -517,7 +517,7 @@ class ArchiveTests(unittest.TestCase):
 
     def test_ctor(self):
         archive = self._makeOne()
-        self.failUnless(archive._head is None)
+        self.assertTrue(archive._head is None)
         self.assertEqual(archive._generation, -1)
 
     def test___iter___empty(self):
