@@ -47,9 +47,8 @@ setup(name='appendonly',
       zip_safe=False,
       install_requires = [
         'persistent',
-       #'ZODB',             # conditional until ported to Py3k
+        'ZODB',
         'zope.interface',
       ],
       test_suite="appendonly.tests",
 )
-

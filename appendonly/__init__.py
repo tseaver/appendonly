@@ -13,14 +13,11 @@
 
 from persistent import Persistent
 from zope.interface import implementer
+from ZODB.POSException import ConflictError
 
-try:
-    from ZODB.POSException import ConflictError
-except ImportError: #pragma NO COVER
-    class ConflictError(Exception):
-        pass
 
 from appendonly.interfaces import IAppendStack
+
 
 class _LayerFull(ValueError):
     pass

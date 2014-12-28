@@ -4,6 +4,8 @@
 1.2 (unreleased)
 ----------------
 
+- Make ``ZODB`` dependency unconditional, now that it fully supports Py3k.
+
 - Add support for testing on Travis.
 
 1.1 (2013-11-28)
