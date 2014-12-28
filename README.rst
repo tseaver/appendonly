@@ -1,5 +1,8 @@
-``appendonly`` README
-=====================
+``appendonly``
+==============
+
+.. image:: https://travis-ci.org/tseaver/appendonly.png?branch=master
+        :target: https://travis-ci.org/tseaver/appendonly
 
 This package provides a set of data structures for use in ZODB applications
 where standard BTrees are poor fits for an application's requirements.
@@ -44,18 +47,19 @@ like::
   from appendonly import Archive
 
   class RecentItems(object):
+
       def __init__(self):
           self._recent = AppendStack()
           self._archive = Archive()
 
-      def pushItem(object):
+      def pushItem(self, object):
           self._stack.push(object, self._archive.addLayer)
 
       def __iter__(self):
           for generation, index, item in self._stack:
               yield item
           for generation, index, item in self._archive:
-              yield items
+              yield item
 
 
 ``appendonly.Accumulator``
