@@ -58,7 +58,7 @@ would be something like:
            self._recent.push(object, self._archive.addLayer)
 
        def __iter__(self):
-           for generation, index, item in self._stack:
+           for generation, index, item in self._recent:
                yield item
            for generation, index, item in self._archive:
                yield item
