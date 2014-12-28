@@ -1,6 +1,11 @@
 ``appendonly`` Changelog
 ========================
 
+1.3 (unreleased)
+----------------
+
+- Sphinxify README, and host at RTD.
+
 1.2 (2014-12-28)
 ----------------
 
