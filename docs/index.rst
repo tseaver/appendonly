@@ -55,7 +55,7 @@ would be something like:
            self._archive = Archive()
 
        def pushItem(self, object):
-           self._stack.push(object, self._archive.addLayer)
+           self._recent.push(object, self._archive.addLayer)
 
        def __iter__(self):
            for generation, index, item in self._stack:
